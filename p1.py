@@ -15,7 +15,7 @@ filename = "text0.txt"
 with open(filename, "r", encoding="utf-8") as f:
     content = f.read()
 
-print(content)
+# print(content)
 
 # 4. ユーザーの発言を履歴に追加
 chat_history.append({"role": "user", "content": content})
