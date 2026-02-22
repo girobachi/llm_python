@@ -30,6 +30,11 @@ while True:
         response = client.chat(
             model='gemma3:12b',
             messages=chat_history,
+            options={
+                "temperature": 0.0,
+                "seed": 42, # 任意の整数でOK
+                "num_ctx": 32768
+            }
         )
 
         # 7. 回答の抽出と表示

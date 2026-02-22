@@ -7,7 +7,7 @@ from ollama import Client
 class GemmaFileReader:
     def __init__(self, model: str = "gemma3:12b", host: str = "http://192.168.0.110:11434"):
         self.model = model
-        self.client = Client(host=host)  # ← リモートホスト指定   
+        self.client = Client(host=host, timeout=300)  # ← リモートホスト指定   
         
     # 対応拡張子
     SUPPORTED_EXTENSIONS = {".txt", ".pdf", ".jpg", ".jpeg", ".png", ".webp", ".bmp"}

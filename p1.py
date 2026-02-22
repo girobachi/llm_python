@@ -1,16 +1,16 @@
 from ollama import Client  # 直接 ollama ではなく Client を使う
 from prompts import SYSTEM_PROMPT # SYSTEM_PROMPT
-
+import httpx
 
 # 1. 外部サーバーのアドレスを指定してクライアントを初期化
-client = Client(host='http://192.168.0.110:11434')
+client = Client(host='http://192.168.0.110:11434', timeout=httpx.Timeout(None))
 
 # 2. 会話履歴を保存するリスト
 chat_history = [
     {"role": "system", "content": SYSTEM_PROMPT}
 ]
 
-filename = "text0.txt"
+filename = "tmp.txt"
 
 with open(filename, "r", encoding="utf-8") as f:
     content = f.read()
@@ -29,7 +29,8 @@ try:
         messages=chat_history,
         options={
             "temperature": 0.0,
-            "seed": 42 # 任意の整数でOK
+            "seed": 42, # 任意の整数でOK
+            "num_ctx": 32768
         }
     )
 
