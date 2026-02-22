@@ -41,5 +41,5 @@ htmlcov/
 .pdf
 .txt
 
-./input_folder
 
+input_folder/
