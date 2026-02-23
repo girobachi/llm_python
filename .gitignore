@@ -40,6 +40,7 @@ htmlcov/
 .jpg
 .pdf
 .txt
+.csv
 
 
 input_folder/
