@@ -88,6 +88,3 @@ class GemmaFileReader:
 if __name__ == "__main__":
     reader = GemmaFileReader(host="http://192.168.0.110:11434")
     reader.transcribe_folder("./input_folder", output_path="tmp.txt")
-    # reader.transcribe_to_file("text0.txt")         # txtの文字起こし
-    # reader.transcribe_to_file("7.pdf")    # PDFの文字起こし
-    # reader.transcribe_to_file("memo.jpg")        # 手書き画像の文字起こし
