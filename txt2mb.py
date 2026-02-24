@@ -46,7 +46,7 @@ class GemmaFileReader:
         doc.close()
         return text
     
-    def transcribe_folder(self, input_path: str, output_file: str = "tmp.txt"):
+    def transcribe_folder(self, input_path: str, output_file: str = "tmp.csv"):
         """ input_folder/下のファイルを全てoutput_fileファイルに変換してまとめる """
         print(f"AI: {input_path}内のファイルを文字に変換します--->")
 
@@ -68,8 +68,12 @@ class GemmaFileReader:
 
         print(f"対象ファイル数: {len(files)} 件")
 
+        # 最初にwで空ファイルtmp.csvを作成
         with open(output_file, "w", encoding="utf-8") as out:
-            for i, file in enumerate(files, 1):
+            pass
+        
+        for i, file in enumerate(files, 1):
+            with open("temp.txt", "w", encoding="utf-8") as out:
                 print(f"[{i}/{len(files)}] 処理中: {file.name}")
                 try:
                     result = self.ask(
@@ -80,16 +84,37 @@ class GemmaFileReader:
                     out.write(f"=== {file.name} ===\n")
                     out.write(result)
                     out.write("\n\n")
+                    out.close() # temp.txtをクロースしてmake_csv()で読み込む。
+
+                    # tmp.txt を　csv化
+                    self.make_csv("temp.txt", output_file) # tmp.csvに追記
                     print(f"  → 完了")
 
                 except Exception as e:
                     print(f"  → エラー: {e}")
-                    out.write(f"=== {file.name} === [エラー: {e}]\n\n")
+
+        # with open(output_file, "w", encoding="utf-8") as out:
+        #     for i, file in enumerate(files, 1):
+        #         print(f"[{i}/{len(files)}] 処理中: {file.name}")
+        #         try:
+        #             result = self.ask(
+        #                 "文字起こしをしてください。内容をそのまま正確に出力してください。",
+        #                 str(file)
+        #             )
+        #             # ファイル区切りヘッダーを追加
+        #             out.write(f"=== {file.name} ===\n")
+        #             out.write(result)
+        #             out.write("\n\n")
+        #             print(f"  → 完了")
+
+        #         except Exception as e:
+        #             print(f"  → エラー: {e}")
+        #             out.write(f"=== {file.name} === [エラー: {e}]\n\n")
 
         print(f"\n全ファイル保存完了: {input_path}")
 
 
-    def make_csv(self, input_file: str = "tmp.txt", output_file: str ="tmp.csv"):
+    def make_csv(self, input_file: str = "temp.txt", output_file: str ="tmp.csv"):
         """ output_fileファイルをMB用csvに変換する """
         print(f"AI: {input_file}をcsv化します--->")
 
@@ -109,7 +134,7 @@ class GemmaFileReader:
                     options={
                         "temperature": 0.0,
                         "seed": 42, # 任意の整数でOK
-                        "num_ctx": 8192
+                        "num_ctx": 16384
                     }
                 )
 
@@ -118,7 +143,7 @@ class GemmaFileReader:
                 print(f"AI: {answer}")
 
                 # ファイルに書き込み
-                with open(output_file, "w", encoding="utf-8") as fw:
+                with open(output_file, "a", encoding="utf-8") as fw:
                     fw.write(answer)
                     print(f"回答を {output_file} に保存しました。")
 
@@ -144,10 +169,10 @@ if __name__ == "__main__":
     reader = GemmaFileReader(host="http://192.168.0.112:11434")
 
     """ input_folder/下のファイルを全てoutput_fileファイルに変換してまとめる """
-    reader.transcribe_folder(input_path="./input_folder", output_file="tmp.txt") 
+    reader.transcribe_folder(input_path="./input_folder", output_file="tmp.csv") 
 
-    """ output_fileファイルをMB用csvに変換する """
-    reader.make_csv(input_file="tmp.txt", output_file="tmp.csv")
+    # """ output_fileファイルをMB用csvに変換する """
+    # reader.make_csv(input_file="tmp.txt", output_file="tmp.csv")
 
     """ utf8のファイルをshiftjisに変換 """
     utf82shiftjis("tmp.csv", "tmps.csv")
