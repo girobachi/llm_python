@@ -9,7 +9,7 @@ import httpx
 import pandas as pd
 
 class GemmaFileReader:
-    def __init__(self, model: str = "gemma3:12b", host: str = "http://192.168.0.110:11434"):
+    def __init__(self, model: str = "gemma3:12b", host: str = "http://localhost:11434"):
         self.model = model
         self.client = Client(host=host, timeout=600)  # ← リモートホスト指定   
         
@@ -141,7 +141,7 @@ def utf82shiftjis(utf8_path: str, cp932_path: str = "tmps.csv"):
 # 使用例
 
 if __name__ == "__main__":
-    reader = GemmaFileReader(host="http://192.168.0.110:11434")
+    reader = GemmaFileReader(host="http://192.168.0.112:11434")
 
     """ input_folder/下のファイルを全てoutput_fileファイルに変換してまとめる """
     reader.transcribe_folder(input_path="./input_folder", output_file="tmp.txt") 
@@ -154,7 +154,7 @@ if __name__ == "__main__":
 
     """ MBに変換 """
     client = MBClient()
-    if client.connect("192.168.0.110", 65001) == False:
+    if client.connect("192.168.0.112", 65001) == False:
         print("Failed to connect.")
         exit(-1)
     client.send("pal 001")

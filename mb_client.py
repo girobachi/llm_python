@@ -224,6 +224,8 @@ def main():
             print(client.body)
     except (KeyboardInterrupt, Exception) as e:
         print(f"\n{e}")
+    finally:
+        client.close()
 
 if __name__ == "__main__":
     main()
