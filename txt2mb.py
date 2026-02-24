@@ -11,7 +11,7 @@ import pandas as pd
 class GemmaFileReader:
     def __init__(self, model: str = "gemma3:12b", host: str = "http://192.168.0.110:11434"):
         self.model = model
-        self.client = Client(host=host, timeout=300)  # ← リモートホスト指定   
+        self.client = Client(host=host, timeout=600)  # ← リモートホスト指定   
         
     # 対応拡張子
     SUPPORTED_EXTENSIONS = {".txt", ".pdf", ".jpg", ".jpeg", ".png", ".webp", ".bmp"}
@@ -47,7 +47,9 @@ class GemmaFileReader:
         return text
     
     def transcribe_folder(self, input_path: str, output_file: str = "tmp.txt"):
-        """フォルダ内の全ファイルを文字起こしして1つのファイルに保存"""
+        """ input_folder/下のファイルを全てoutput_fileファイルに変換してまとめる """
+        print(f"AI: {input_path}内のファイルを文字に変換します--->")
+
         folder = Path(input_path)
 
         if not folder.exists() or not folder.is_dir():
@@ -88,20 +90,18 @@ class GemmaFileReader:
 
 
     def make_csv(self, input_file: str = "tmp.txt", output_file: str ="tmp.csv"):
-        # 2. 会話履歴を保存するリスト
+        """ output_fileファイルをMB用csvに変換する """
+        print(f"AI: {input_file}をcsv化します--->")
+
         chat_history = [
             {"role": "system", "content": SYSTEM_PROMPT}
         ]
 
         with open(input_file, "r", encoding="utf-8") as f:
             content = f.read()
-
-            # 4. ユーザーの発言を履歴に追加
             chat_history.append({"role": "user", "content": content})
 
-            # 5. 履歴の制限（システムプロンプト1件 + 直近10件）
             try:
-                # 6. 指定したサーバー(client)に履歴を投げる
                 response = self.client.chat(
             #        model='gpt-oss:20b',
                     model='gemma3:12b',
@@ -109,11 +109,11 @@ class GemmaFileReader:
                     options={
                         "temperature": 0.0,
                         "seed": 42, # 任意の整数でOK
-                        "num_ctx": 32768
+                        "num_ctx": 8192
                     }
                 )
 
-                # 7. 回答の抽出と表示
+                # 回答の抽出と表示
                 answer = response['message']['content']
                 print(f"AI: {answer}")
 
@@ -127,6 +127,8 @@ class GemmaFileReader:
 
 
 def utf82shiftjis(utf8_path: str, cp932_path: str = "tmps.csv"):
+    print(f"{utf8_path}をshiftjisに変換します--->")
+
     with open(utf8_path, "r", encoding="utf-8") as f:
         content = f.read()
 
@@ -142,10 +144,10 @@ if __name__ == "__main__":
     reader = GemmaFileReader(host="http://192.168.0.110:11434")
 
     """ input_folder/下のファイルを全てoutput_fileファイルに変換してまとめる """
-    reader.transcribe_folder(input_path="./input_folder", output_file="tmp.txt") 
+    # reader.transcribe_folder(input_path="./input_folder", output_file="tmp.txt") 
 
     """ output_fileファイルをMB用csvに変換する """
-    reader.make_csv(input_file="tmp.txt",output_file="tmp.csv")
+    reader.make_csv(input_file="tmp.txt", output_file="tmp.csv")
 
     """ utf8のファイルをshiftjisに変換 """
     utf82shiftjis("tmp.csv", "tmps.csv")
