@@ -41,7 +41,8 @@ class Header:
         if not self.error:
             return ""
         hex_str = f"{self.error:04x}".upper()
-        return f"{hex_str} : {error_dictionary.get(self.error, 'Unknown')}"
+        return f"{hex_str}"
+        # return f"{hex_str} : {error_dictionary.get(self.error, 'Unknown')}"
     
     @staticmethod
     def build(cmd: int, err: int, size: int, t: float) -> bytes:

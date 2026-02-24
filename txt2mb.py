@@ -147,7 +147,7 @@ if __name__ == "__main__":
     # utf82shiftjis("tmp.csv", "tmps.csv")
 
     client = MBClient()
-    if client.connect("", 65001) == False:
+    if client.connect("192.168.0.110", 65001) == False:
         print("Failed to connect.")
         exit(-1)
     client.send("pal 001")
