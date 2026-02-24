@@ -37,9 +37,9 @@ htmlcov/
 # ログ
 *.log
 
-.jpg
-.pdf
-.txt
+*.jpg
+*.pdf
+*.txt
 *.csv
 
 
