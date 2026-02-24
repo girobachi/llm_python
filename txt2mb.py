@@ -144,7 +144,7 @@ if __name__ == "__main__":
     reader = GemmaFileReader(host="http://192.168.0.110:11434")
 
     """ input_folder/下のファイルを全てoutput_fileファイルに変換してまとめる """
-    # reader.transcribe_folder(input_path="./input_folder", output_file="tmp.txt") 
+    reader.transcribe_folder(input_path="./input_folder", output_file="tmp.txt") 
 
     """ output_fileファイルをMB用csvに変換する """
     reader.make_csv(input_file="tmp.txt", output_file="tmp.csv")
