@@ -127,25 +127,30 @@ class GemmaFileReader:
 
 
 def utf82shiftjis(utf8_path: str, cp932_path: str = "tmps.csv"):
-    df = pd.read_csv(utf8_path, encoding="utf-8")
-    df.to_csv(cp932_path, encoding="cp932", errors="replace", index=False) # 変換できない文字を ? に置換 
+    with open(utf8_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    with open(cp932_path, "w", encoding="cp932", errors="replace") as f:
+        f.write(content)
+
     print(f"{utf8_path}(utf8)を {cp932_path}(shiftjis)に保存しました。")
 
 
 # 使用例
 
 if __name__ == "__main__":
-    # reader = GemmaFileReader(host="http://192.168.0.110:11434")
+    reader = GemmaFileReader(host="http://192.168.0.110:11434")
 
-    # """ input_folder/下のファイルを全てoutput_fileファイルに変換してまとめる """
-    # reader.transcribe_folder(input_path="./input_folder", output_file="tmp.txt") 
+    """ input_folder/下のファイルを全てoutput_fileファイルに変換してまとめる """
+    reader.transcribe_folder(input_path="./input_folder", output_file="tmp.txt") 
 
-    # """ output_fileファイルをMB用csvに変換する """
-    # reader.make_csv(input_file="tmp.txt",output_file="tmp.csv")
+    """ output_fileファイルをMB用csvに変換する """
+    reader.make_csv(input_file="tmp.txt",output_file="tmp.csv")
 
-    # """ utf8のファイルをshiftjisに変換 """
-    # utf82shiftjis("tmp.csv", "tmps.csv")
+    """ utf8のファイルをshiftjisに変換 """
+    utf82shiftjis("tmp.csv", "tmps.csv")
 
+    """ MBに変換 """
     client = MBClient()
     if client.connect("192.168.0.110", 65001) == False:
         print("Failed to connect.")
