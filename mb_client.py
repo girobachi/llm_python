@@ -20,7 +20,7 @@ class Config:
     ENCODING = "cp932"
     
     PORT = int(os.getenv("SYNAPSE_DEFAULT_PORT", "65001"))
-    HOST = os.getenv("SYNAPSE_DEFAULT_URL", "192.168.0.110")
+    HOST = os.getenv("SYNAPSE_DEFAULT_URL", "localhost")
     MAX_RETRY = 5
     RETRY_DELAY = 1.0
 
@@ -126,6 +126,59 @@ class MBClient:
             print(f"Communication error: {e}")
             return Status.ERROR
     
+    # set file command
+    def file_send(self, file_name : str) -> Status:
+        try:
+            if not os.path.exists(file_name):
+                print("File not found")
+                raise StopIteration
+        
+            file_size = os.path.getsize(file_name)
+        
+            if file_size > (1024*1024*1024):
+                print(f"ファイルサイズが大き過ぎます({file_size}byte)")
+                raise StopIteration
+        
+            # 'set open file_size filename' コマンド送信
+            command = f"set open {file_size} {file_name}"
+            print(f"COM={command}")
+
+            # 送信
+            data = command.encode(Config.ENCODING)
+            header = Header.build(0, 0, len(data), 0.0)
+            self.sock.send(header + b'\n' + data)
+            
+            # 受信
+            raw_header = self.sock.recv(Config.HEADER_WITH_NL)
+            if len(raw_header) < Config.HEADER_WITH_NL:
+                raise StopIteration
+            
+            header = Header(raw_header[:Config.HEADER_SIZE])
+            if not 0 <= header.size <= Config.MAX_BUFFER:
+                raise StopIteration
+            
+            with open(file_name, "rb") as f:
+                file_data = f.read()
+        
+                # 送信
+                data = file_data
+                header = Header.build(0, 0, len(data), 0.0)
+                self.sock.send(header + b'\n' + data)
+
+            # 受信
+            raw_header = self.sock.recv(Config.HEADER_WITH_NL)
+            if len(raw_header) < Config.HEADER_WITH_NL:
+                return Status.ERROR
+            
+        except StopIteration:
+            pass  # C++のbreakに相当
+        except FileNotFoundError:
+            print("File not found")
+        except OSError as e:
+            print(f"ファイルエラー: {e}")
+        except Exception as e:
+            print(f"予期しないエラー: {e}")
+
     @property
     def header(self) -> str:
         return self._response[:Config.HEADER_WITH_NL] if self._response else ""
