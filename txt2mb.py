@@ -7,9 +7,29 @@ from mb_client import MBClient, Status
 from prompts import SYSTEM_PROMPT # SYSTEM_PROMPT
 import httpx
 import pandas as pd
+import time
+
+# 調整パラメタ
+#Windows
+# C:\Users\girob> $env:OLLAMA_HOST="0.0.0.0"
+# C:\Users\girob> ollama serve
+HOST_OLLAMA="http://172.20.240.1:11434" # Wsl IP
+HOST_MB=""  # Wsl
+
+#Macbook
+# HOST_OLLAMA="http://192.168.0.112:11434" # Mac
+# HOST_MB="192.168.0.112" # Mac
+
+MODEL_LLM="gemma3:12b"        # LLMモデル名
+INPUT_FOLDER="./input_folder" # 変換したいファイルを入れるフォルダ
+
+# 固定パラメタ
+TEMP_UTF8_CSV="tmp.csv"       # フォルダ内の１ファイルをcsvに変換
+TEMP_SJIS_CSV="tmps.csv"      # Shiftjisに変換
+TEMP_TXT="temp.txt"           # 変換用一時ファイル
 
 class GemmaFileReader:
-    def __init__(self, model: str = "gemma3:12b", host: str = "http://localhost:11434"):
+    def __init__(self, model: str = MODEL_LLM, host: str = "http://localhost:11434"):
         self.model = model
         self.client = Client(host=host, timeout=600)  # ← リモートホスト指定   
         
@@ -46,8 +66,8 @@ class GemmaFileReader:
         doc.close()
         return text
     
-    def transcribe_folder(self, input_path: str, output_file: str = "tmp.csv"):
-        """ input_folder/下のファイルを全てoutput_fileファイルに変換してまとめる """
+    def transcribe_folder2csv(self, input_path: str = INPUT_FOLDER, output_file: str = TEMP_UTF8_CSV):
+        """ INPUTFOLDER/下のファイルを全てoutput_fileファイルに変換してまとめる """
         print(f"AI: {input_path}内のファイルを文字に変換します--->")
 
         folder = Path(input_path)
@@ -73,7 +93,7 @@ class GemmaFileReader:
             pass
         
         for i, file in enumerate(files, 1):
-            with open("temp.txt", "w", encoding="utf-8") as out:
+            with open(TEMP_TXT, "w", encoding="utf-8") as out:
                 print(f"[{i}/{len(files)}] 処理中: {file.name}")
                 try:
                     result = self.ask(
@@ -84,10 +104,10 @@ class GemmaFileReader:
                     out.write(f"=== {file.name} ===\n")
                     out.write(result)
                     out.write("\n\n")
-                    out.close() # temp.txtをクロースしてmake_csv()で読み込む。
+                    out.close() # TEMPFILEをクロースしてmake_csv()で読み込む。
 
                     # tmp.txt を　csv化
-                    self.make_csv("temp.txt", output_file) # tmp.csvに追記
+                    self.make_csv() # tmp.csvに追記
                     print(f"  → 完了")
 
                 except Exception as e:
@@ -96,7 +116,7 @@ class GemmaFileReader:
         print(f"\n全ファイル保存完了: {input_path}")
 
 
-    def make_csv(self, input_file: str = "temp.txt", output_file: str ="tmp.csv"):
+    def make_csv(self, input_file: str = TEMP_TXT, output_file: str = TEMP_UTF8_CSV):
         """ output_fileファイルをMB用csvに変換する """
         print(f"AI: {input_file}をcsv化します--->")
 
@@ -111,7 +131,7 @@ class GemmaFileReader:
             try:
                 response = self.client.chat(
             #        model='gpt-oss:20b',
-                    model='gemma3:12b',
+                    model=MODEL_LLM,
                     messages=chat_history,
                     options={
                         "temperature": 0.0,
@@ -133,7 +153,7 @@ class GemmaFileReader:
                 print(f"エラーが発生しました。サーバーが起動しているか確認してください: {e}")
 
 
-def utf82shiftjis(utf8_path: str, cp932_path: str = "tmps.csv"):
+def utf82shiftjis(utf8_path: str = TEMP_UTF8_CSV, cp932_path: str = TEMP_SJIS_CSV):
     print(f"{utf8_path}をshiftjisに変換します--->")
 
     with open(utf8_path, "r", encoding="utf-8") as f:
@@ -148,25 +168,24 @@ def utf82shiftjis(utf8_path: str, cp932_path: str = "tmps.csv"):
 # 使用例
 
 if __name__ == "__main__":
-    reader = GemmaFileReader(host="http://172.20.240.1:11434") # Wsl
-    # reader = GemmaFileReader(host="http://192.168.0.112:11434") # Mac
+    start = time.time()
+    reader = GemmaFileReader(host = HOST_OLLAMA)
 
     """ input_folder/下のファイルを全てoutput_fileファイルに変換してまとめる """
-    reader.transcribe_folder(input_path="./input_folder", output_file="tmp.csv") 
-
-    # """ output_fileファイルをMB用csvに変換する """
-    # reader.make_csv(input_file="tmp.txt", output_file="tmp.csv")
+    reader.transcribe_folder2csv() 
 
     """ utf8のファイルをshiftjisに変換 """
-    utf82shiftjis("tmp.csv", "tmps.csv")
+    utf82shiftjis()
 
     """ MBに変換 """
     client = MBClient()
-    # if client.connect("192.168.0.112", 65001) == False: # Mac
-    if client.connect("", 65001) == False: # Wsl
+    if client.connect(HOST_MB, 65001) == False:
         print("Failed to connect.")
         exit(-1)
     client.send("pal 001")
     client.send("cre test")
     client.send("use test")
     client.file_send("tmps.csv")
+
+    elapsed = time.time() - start
+    print(f"実行時間: {elapsed:.2f}秒")
