@@ -121,12 +121,7 @@ class GemmaFileReader:
         print(f"AI: {input_file}をcsv化します--->")
 
         with open(input_file, "r", encoding="utf-8") as f:
-            # chat_history = [
-            #    {"role": "system", "content": SYSTEM_PROMPT}
-            # ]
             content = f.read()
-            # chat_history.append({"role": "user", "content": content})
-
             chat_history = [
                 {"role": "user", "content": SYSTEM_PROMPT + "\n\n" + content}
             ]
@@ -139,7 +134,7 @@ class GemmaFileReader:
                     options={
                         "temperature": 0.0,
                         "seed": 42, # 任意の整数でOK
-                        "num_ctx": 16384
+                        "num_ctx": 40000
                     }
                 )
 
@@ -150,6 +145,7 @@ class GemmaFileReader:
                 # ファイルに書き込み
                 with open(output_file, "a", encoding="utf-8") as fw:
                     fw.write(answer)
+                    fw.write("\n")
                     print(f"回答を {output_file} に保存しました。")
 
             except Exception as e:
