@@ -120,13 +120,16 @@ class GemmaFileReader:
         """ output_fileファイルをMB用csvに変換する """
         print(f"AI: {input_file}をcsv化します--->")
 
-        chat_history = [
-            {"role": "system", "content": SYSTEM_PROMPT}
-        ]
-
         with open(input_file, "r", encoding="utf-8") as f:
+            # chat_history = [
+            #    {"role": "system", "content": SYSTEM_PROMPT}
+            # ]
             content = f.read()
-            chat_history.append({"role": "user", "content": content})
+            # chat_history.append({"role": "user", "content": content})
+
+            chat_history = [
+                {"role": "user", "content": SYSTEM_PROMPT + "\n\n" + content}
+            ]
 
             try:
                 response = self.client.chat(
@@ -142,7 +145,7 @@ class GemmaFileReader:
 
                 # 回答の抽出と表示
                 answer = response['message']['content']
-                print(f"AI: {answer}")
+                print(f"{answer}")
 
                 # ファイルに書き込み
                 with open(output_file, "a", encoding="utf-8") as fw:
