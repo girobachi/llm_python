@@ -93,24 +93,6 @@ class GemmaFileReader:
                 except Exception as e:
                     print(f"  → エラー: {e}")
 
-        # with open(output_file, "w", encoding="utf-8") as out:
-        #     for i, file in enumerate(files, 1):
-        #         print(f"[{i}/{len(files)}] 処理中: {file.name}")
-        #         try:
-        #             result = self.ask(
-        #                 "文字起こしをしてください。内容をそのまま正確に出力してください。",
-        #                 str(file)
-        #             )
-        #             # ファイル区切りヘッダーを追加
-        #             out.write(f"=== {file.name} ===\n")
-        #             out.write(result)
-        #             out.write("\n\n")
-        #             print(f"  → 完了")
-
-        #         except Exception as e:
-        #             print(f"  → エラー: {e}")
-        #             out.write(f"=== {file.name} === [エラー: {e}]\n\n")
-
         print(f"\n全ファイル保存完了: {input_path}")
 
 
@@ -166,7 +148,8 @@ def utf82shiftjis(utf8_path: str, cp932_path: str = "tmps.csv"):
 # 使用例
 
 if __name__ == "__main__":
-    reader = GemmaFileReader(host="http://192.168.0.112:11434")
+    reader = GemmaFileReader(host="http://172.20.240.1:11434") # Wsl
+    # reader = GemmaFileReader(host="http://192.168.0.112:11434") # Mac
 
     """ input_folder/下のファイルを全てoutput_fileファイルに変換してまとめる """
     reader.transcribe_folder(input_path="./input_folder", output_file="tmp.csv") 
@@ -179,7 +162,8 @@ if __name__ == "__main__":
 
     """ MBに変換 """
     client = MBClient()
-    if client.connect("192.168.0.112", 65001) == False:
+    # if client.connect("192.168.0.112", 65001) == False: # Mac
+    if client.connect("", 65001) == False: # Wsl
         print("Failed to connect.")
         exit(-1)
     client.send("pal 001")
