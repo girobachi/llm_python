@@ -43,7 +43,7 @@ llm = OllamaLLM(model="gemma3:12b", base_url="http://172.20.240.1:11434")  # ロ
 
 # ReActプロンプトをhubから取得
 prompt = hub.pull("hwchase17/react")
-
+# print(prompt)
 agent = create_react_agent(llm, tools, prompt)
 agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 

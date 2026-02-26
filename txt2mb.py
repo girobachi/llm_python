@@ -11,6 +11,8 @@ import time
 
 # 調整パラメタ
 #Windows
+# C:\Users\girob> taskkill /F /IM "ollama app.exe"
+# C:\Users\girob> taskkill /F /IM ollama.exe
 # C:\Users\girob> $env:OLLAMA_HOST="0.0.0.0"
 # C:\Users\girob> ollama serve
 HOST_OLLAMA="http://172.20.240.1:11434" # Wsl IP
@@ -20,7 +22,9 @@ HOST_MB=""  # Wsl
 # HOST_OLLAMA="http://192.168.0.112:11434" # Mac
 # HOST_MB="192.168.0.112" # Mac
 
-MODEL_LLM="gemma3:12b"        # LLMモデル名
+MODEL_LLM="gpt-oss:20b"        # LLMモデル名 gpt-oss:20b
+# MODEL_LLM="gemma3:12b"       # LLMモデル名 
+# MODEL_LLM="qwen3:14b"        # LLMモデル名 日本語に強いとされるQwen3を使用。Gemma3は英語に強い。
 INPUT_FOLDER="./input_folder" # 変換したいファイルを入れるフォルダ
 
 # 固定パラメタ
@@ -31,7 +35,7 @@ TEMP_TXT="temp.txt"           # 変換用一時ファイル
 class GemmaFileReader:
     def __init__(self, model: str = MODEL_LLM, host: str = "http://localhost:11434"):
         self.model = model
-        self.client = Client(host=host, timeout=600)  # ← リモートホスト指定   
+        self.client = Client(host=host, timeout=1800)  # ← リモートホスト指定   
         
     # 対応拡張子
     SUPPORTED_EXTENSIONS = {".txt", ".pdf", ".jpg", ".jpeg", ".png", ".webp", ".bmp"}
@@ -116,6 +120,7 @@ class GemmaFileReader:
         print(f"\n全ファイル保存完了: {input_path}")
 
 
+    # 今の用途（CSV構造化出力）ではThinking Modeは不要なので、Qwen3に乗り換えるなら/no_thinkは必須
     def make_csv(self, input_file: str = TEMP_TXT, output_file: str = TEMP_UTF8_CSV):
         """ output_fileファイルをMB用csvに変換する """
         print(f"AI: {input_file}をcsv化します--->")
@@ -123,12 +128,12 @@ class GemmaFileReader:
         with open(input_file, "r", encoding="utf-8") as f:
             content = f.read()
             chat_history = [
-                {"role": "user", "content": SYSTEM_PROMPT + "\n\n" + content}
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": "/no_think\n\n" + content}
             ]
 
             try:
                 response = self.client.chat(
-            #        model='gpt-oss:20b',
                     model=MODEL_LLM,
                     messages=chat_history,
                     options={
