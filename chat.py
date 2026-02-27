@@ -1,5 +1,6 @@
 from ollama import Client  # 直接 ollama ではなく Client を使う
 
+# client = Client(host='http://100.67.72.27:11434', timeout=600)# 1. 外部サーバーのアドレスを指定してクライアントを初期化
 client = Client(host='http://172.20.240.1:11434', timeout=600)# 1. 外部サーバーのアドレスを指定してクライアントを初期化
 # response = client.list()
 # print(response)

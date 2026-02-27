@@ -22,8 +22,8 @@ HOST_MB=""  # Wsl
 # HOST_OLLAMA="http://192.168.0.112:11434" # Mac
 # HOST_MB="192.168.0.112" # Mac
 
-MODEL_LLM="gpt-oss:20b"        # LLMモデル名 gpt-oss:20b
-# MODEL_LLM="gemma3:12b"       # LLMモデル名 
+# MODEL_LLM="gpt-oss:20b"        # LLMモデル名 gpt-oss:20b
+MODEL_LLM="gemma3:12b"       # LLMモデル名 
 # MODEL_LLM="qwen3:14b"        # LLMモデル名 日本語に強いとされるQwen3を使用。Gemma3は英語に強い。
 INPUT_FOLDER="./input_folder" # 変換したいファイルを入れるフォルダ
 
@@ -175,6 +175,8 @@ if __name__ == "__main__":
     start = time.time()
     reader = GemmaFileReader(host = HOST_OLLAMA)
 
+    # reader.make_csv("input_folder/text0.txt") # tmp.txt を　csv化
+
     """ input_folder/下のファイルを全てoutput_fileファイルに変換してまとめる """
     reader.transcribe_folder2csv() 
 
@@ -182,14 +184,14 @@ if __name__ == "__main__":
     utf82shiftjis()
 
     """ MBに変換 """
-    client = MBClient()
-    if client.connect(HOST_MB, 65001) == False:
-        print("Failed to connect.")
-        exit(-1)
-    client.send("pal 001")
-    client.send("cre test")
-    client.send("use test")
-    client.file_send("tmps.csv")
+    # client = MBClient()
+    # if client.connect(HOST_MB, 65001) == False:
+    #     print("Failed to connect.")
+    #     exit(-1)
+    # client.send("pal 001")
+    # client.send("cre test")
+    # client.send("use test")
+    # client.file_send("tmps.csv")
 
     elapsed = time.time() - start
     print(f"実行時間: {elapsed:.2f}秒")
