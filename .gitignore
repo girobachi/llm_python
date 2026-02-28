@@ -39,9 +39,9 @@ htmlcov/
 
 *.jpg
 *.pdf
-*.txt
+#*.txt
 *.csv
 
 
-input_folder/
+#input_folder/
 warehouse/
