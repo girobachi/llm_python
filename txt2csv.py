@@ -25,12 +25,12 @@ try:
     # 6. 指定したサーバー(client)に履歴を投げる
     response = client.chat(
 #        model='gpt-oss:20b',
-        model='gemma3:12b',
+        model='gemma3:27b',
         messages=chat_history,
         options={
             "temperature": 0.0,
             "seed": 42, # 任意の整数でOK
-            "num_ctx": 32768
+            "num_ctx": 8192
         }
     )
 
