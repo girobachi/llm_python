@@ -5,7 +5,8 @@ from pathlib import Path
 from ollama import Client
 from mb_client import MBClient, Status
 from prompts import SYSTEM_PROMPT # SYSTEM_PROMPT
-import httpx
+import csv
+import sys
 import pandas as pd
 import time
 
@@ -25,7 +26,7 @@ HOST_MB=""  # Wsl
 # HOST_MB="192.168.0.112" # Mac
 
 # MODEL_LLM="gpt-oss:20b"        # LLMモデル名 gpt-oss:20b
-MODEL_LLM="gemma3:27b"       # LLMモデル名 
+MODEL_LLM="gemma3:12b"       # LLMモデル名 
 # MODEL_LLM="qwen3:14b"        # LLMモデル名 日本語に強いとされるQwen3を使用。Gemma3は英語に強い。
 INPUT_FOLDER="./input_folder" # 変換したいファイルを入れるフォルダ
 
@@ -135,21 +136,47 @@ class GemmaFileReader:
         )
         return response['message']['content']
 
+def check_pair_structure(filepath: str) -> list[dict]:
+    """
+    カラム・バリューが交互に並ぶCSVの対構造をチェックする。
+    例: Date,2025/09/14,Time,17:20:00,...
+    Returns: エラーのリスト。各エラーは行番号・問題内容を含む辞書。
+    """        
+    errors = []
 
+    with open(filepath, encoding="utf-8", newline="") as f:
+        for row_num, row in enumerate(csv.reader(f), start=1):
+            if not any(row):
+                continue
+
+            # ① 要素数が奇数
+            if len(row) % 2 != 0:
+                errors.append({"row": row_num, "issue": f"要素数が奇数({len(row)}個)"})
+                continue
+
+            keys, values = row[0::2], row[1::2]
+
+            # ② キーが空
+            for i, k in enumerate(keys):
+                if not k.strip():
+                    errors.append({"row": row_num, "col": i*2+1, "issue": f"列{i*2+1}: キーが空"})
+
+            # ③ バリューが空
+            for i, v in enumerate(values):
+                if not v.strip():
+                    errors.append({"row": row_num, "col": i*2+2, "issue": f"列{i*2+2}: バリューが空(キー:'{keys[i]}')"})
+    return errors
+    
 def utf82shiftjis(utf8_path: str = TEMP_UTF8_CSV, cp932_path: str = TEMP_SJIS_CSV):
     print(f"{utf8_path}をshiftjisに変換します--->")
 
     with open(utf8_path, "r", encoding="utf-8") as f:
         content = f.read()
-
     with open(cp932_path, "w", encoding="cp932", errors="replace") as f:
         f.write(content)
-
     print(f"{utf8_path}(utf8)を {cp932_path}(shiftjis)に保存しました。")
 
-
 # 使用例
-
 if __name__ == "__main__":
     start = time.time()
     reader = GemmaFileReader(host = HOST_OLLAMA)
@@ -157,18 +184,29 @@ if __name__ == "__main__":
     """ input_folder/下のファイルを全てoutput_fileファイルに変換してまとめる """
     reader.transcribe_folder2csv() 
 
+    """ csv check """
+    print(f"チェック対象: {TEMP_UTF8_CSV}\n")
+    errors = check_pair_structure(TEMP_UTF8_CSV)
+    if not errors:
+        print("✅ 問題なし")
+    else:
+        print(f"❌ {len(errors)}件の問題:")
+        for e in errors:
+            loc = f"行{e['row']}" + (f"/列{e['col']}" if "col" in e else "")
+            print(f"  [{loc}] {e['issue']}")
+
     """ utf8のファイルをshiftjisに変換 """
     utf82shiftjis()
 
     """ MBに変換 """
-    client = MBClient()
-    if client.connect(HOST_MB, 65001) == False:
-        print("Failed to connect.")
-        exit(-1)
-    client.send("pal 001")
-    client.send("cre test")
-    client.send("use test")
-    client.file_send("tmps.csv")
+    # client = MBClient()
+    # if client.connect(HOST_MB, 65001) == False:
+    #     print("Failed to connect.")
+    #     exit(-1)
+    # client.send("pal 001")
+    # client.send("cre test")
+    # client.send("use test")
+    # client.file_send("tmps.csv")
 
     elapsed = time.time() - start
     print(f"実行時間: {elapsed:.2f}秒")
