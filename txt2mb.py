@@ -14,8 +14,10 @@ import time
 # C:\Users\girob> taskkill /F /IM "ollama app.exe"
 # C:\Users\girob> taskkill /F /IM ollama.exe
 # C:\Users\girob> $env:OLLAMA_HOST="0.0.0.0"
-# C:\Users\girob> ollama serve
+# C:\Users\girob> ollama serve &
+# HOST_OLLAMA="http://localhost:11434" # Wsl IP
 HOST_OLLAMA="http://172.20.240.1:11434" # Wsl IP
+# tailscale0のIP 100.67.72.27
 HOST_MB=""  # Wsl
 
 #Macbook
@@ -23,14 +25,13 @@ HOST_MB=""  # Wsl
 # HOST_MB="192.168.0.112" # Mac
 
 # MODEL_LLM="gpt-oss:20b"        # LLMモデル名 gpt-oss:20b
-MODEL_LLM="gemma3:12b"       # LLMモデル名 
+MODEL_LLM="gemma3:27b"       # LLMモデル名 
 # MODEL_LLM="qwen3:14b"        # LLMモデル名 日本語に強いとされるQwen3を使用。Gemma3は英語に強い。
 INPUT_FOLDER="./input_folder" # 変換したいファイルを入れるフォルダ
 
 # 固定パラメタ
 TEMP_UTF8_CSV="tmp.csv"       # フォルダ内の１ファイルをcsvに変換
 TEMP_SJIS_CSV="tmps.csv"      # Shiftjisに変換
-TEMP_TXT="temp.txt"           # 変換用一時ファイル
 
 class GemmaFileReader:
     def __init__(self, model: str = MODEL_LLM, host: str = "http://localhost:11434"):
@@ -92,69 +93,47 @@ class GemmaFileReader:
 
         print(f"対象ファイル数: {len(files)} 件")
 
-        # 最初にwで空ファイルtmp.csvを作成
-        with open(output_file, "w", encoding="utf-8") as out:
-            pass
-        
-        for i, file in enumerate(files, 1):
-            with open(TEMP_TXT, "w", encoding="utf-8") as out:
+        # 追記モードで一度だけ開く、またはリストに溜めて最後に書く
+        with open(output_file, "w", encoding="utf-8") as final_out:
+            for i, file in enumerate(files, 1):
                 print(f"[{i}/{len(files)}] 処理中: {file.name}")
                 try:
-                    result = self.ask(
+                    # 1. 文字起こし (OCR/PDF/Text)
+                    raw_text = self.ask(
                         "文字起こしをしてください。内容をそのまま正確に出力してください。",
                         str(file)
                     )
-                    # ファイル区切りヘッダーを追加
-                    out.write(f"=== {file.name} ===\n")
-                    out.write(result)
-                    out.write("\n\n")
-                    out.close() # TEMPFILEをクロースしてmake_csv()で読み込む。
+                    # print(raw_text + "\n") # 変換データの表示
 
-                    # tmp.txt を　csv化
-                    self.make_csv() # tmp.csvに追記
+                    # そのまま構造化(CSV化)メソッドへ渡す
+                    csv_line = self.process_text_to_csv_line(f"=== {file.name} ===\n{raw_text}")
+                    
+                    # 直接最終ファイルに書き込む
+                    final_out.write(csv_line + "\n")
+                    final_out.flush() # 確実にディスクに書き出す
+                    print(csv_line + "\n")
                     print(f"  → 完了")
 
                 except Exception as e:
                     print(f"  → エラー: {e}")
 
-        print(f"\n全ファイル保存完了: {input_path}")
-
-
-    # 今の用途（CSV構造化出力）ではThinking Modeは不要なので、Qwen3に乗り換えるなら/no_thinkは必須
-    def make_csv(self, input_file: str = TEMP_TXT, output_file: str = TEMP_UTF8_CSV):
-        """ output_fileファイルをMB用csvに変換する """
-        print(f"AI: {input_file}をcsv化します--->")
-
-        with open(input_file, "r", encoding="utf-8") as f:
-            content = f.read()
-            chat_history = [
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": "/no_think\n\n" + content}
-            ]
-
-            try:
-                response = self.client.chat(
-                    model=MODEL_LLM,
-                    messages=chat_history,
-                    options={
-                        "temperature": 0.0,
-                        "seed": 42, # 任意の整数でOK
-                        "num_ctx": 40000
-                    }
-                )
-
-                # 回答の抽出と表示
-                answer = response['message']['content']
-                print(f"{answer}")
-
-                # ファイルに書き込み
-                with open(output_file, "a", encoding="utf-8") as fw:
-                    fw.write(answer)
-                    fw.write("\n")
-                    print(f"回答を {output_file} に保存しました。")
-
-            except Exception as e:
-                print(f"エラーが発生しました。サーバーが起動しているか確認してください: {e}")
+    def process_text_to_csv_line(self, content: str) -> str:
+        """ ファイルではなく文字列を受け取ってLLMで変換する """
+        chat_history = [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": "/no_think\n\n" + content}
+        ]
+        
+        # num_ctxを現実的な数値（例: 8192）に抑える
+        response = self.client.chat(
+            model=self.model,
+            messages=chat_history,
+            options={
+                "temperature": 0.0,
+                "num_ctx": 8192 
+            }
+        )
+        return response['message']['content']
 
 
 def utf82shiftjis(utf8_path: str = TEMP_UTF8_CSV, cp932_path: str = TEMP_SJIS_CSV):
@@ -175,8 +154,6 @@ if __name__ == "__main__":
     start = time.time()
     reader = GemmaFileReader(host = HOST_OLLAMA)
 
-    # reader.make_csv("input_folder/text0.txt") # tmp.txt を　csv化
-
     """ input_folder/下のファイルを全てoutput_fileファイルに変換してまとめる """
     reader.transcribe_folder2csv() 
 
@@ -184,14 +161,14 @@ if __name__ == "__main__":
     utf82shiftjis()
 
     """ MBに変換 """
-    # client = MBClient()
-    # if client.connect(HOST_MB, 65001) == False:
-    #     print("Failed to connect.")
-    #     exit(-1)
-    # client.send("pal 001")
-    # client.send("cre test")
-    # client.send("use test")
-    # client.file_send("tmps.csv")
+    client = MBClient()
+    if client.connect(HOST_MB, 65001) == False:
+        print("Failed to connect.")
+        exit(-1)
+    client.send("pal 001")
+    client.send("cre test")
+    client.send("use test")
+    client.file_send("tmps.csv")
 
     elapsed = time.time() - start
     print(f"実行時間: {elapsed:.2f}秒")
