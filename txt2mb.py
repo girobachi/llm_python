@@ -10,24 +10,26 @@ import sys
 import pandas as pd
 import time
 
-# 調整パラメタ
-#Windows
+# 起動方法
+# Windows
 # C:\Users\girob> taskkill /F /IM "ollama app.exe"
 # C:\Users\girob> taskkill /F /IM ollama.exe
 # C:\Users\girob> $env:OLLAMA_HOST="0.0.0.0"
 # C:\Users\girob> ollama serve &
+
 # HOST_OLLAMA="http://localhost:11434" # Wsl IP
 HOST_OLLAMA="http://172.20.240.1:11434" # Wsl IP
-# tailscale0のIP 100.67.72.27
+# tailscale0のIP 100.67.72.27 # TTDC LLM
 HOST_MB=""  # Wsl
 
-#Macbook
+# Macbook
 # HOST_OLLAMA="http://192.168.0.112:11434" # Mac
 # HOST_MB="192.168.0.112" # Mac
 
 # MODEL_LLM="gpt-oss:20b"        # LLMモデル名 gpt-oss:20b
-MODEL_LLM="gemma3:12b"       # LLMモデル名 
+MODEL_LLM="gemma3:27b"       # LLMモデル名 
 # MODEL_LLM="qwen3:14b"        # LLMモデル名 日本語に強いとされるQwen3を使用。Gemma3は英語に強い。
+
 INPUT_FOLDER="./input_folder" # 変換したいファイルを入れるフォルダ
 
 # 固定パラメタ
@@ -104,7 +106,7 @@ class GemmaFileReader:
                         "文字起こしをしてください。内容をそのまま正確に出力してください。",
                         str(file)
                     )
-                    # print(raw_text + "\n") # 変換データの表示
+                    # print(raw_text + "\n") # 生テキスト変換データの表示
 
                     # そのまま構造化(CSV化)メソッドへ渡す
                     csv_line = self.process_text_to_csv_line(f"=== {file.name} ===\n{raw_text}")
@@ -112,7 +114,7 @@ class GemmaFileReader:
                     # 直接最終ファイルに書き込む
                     final_out.write(csv_line + "\n")
                     final_out.flush() # 確実にディスクに書き出す
-                    print(csv_line + "\n")
+                    print(csv_line + "\n") # CSV化されたテキストの表示
                     print(f"  → 完了")
 
                 except Exception as e:
@@ -122,7 +124,8 @@ class GemmaFileReader:
         """ ファイルではなく文字列を受け取ってLLMで変換する """
         chat_history = [
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": "/no_think\n\n" + content}
+            {"role": "user", "content": content}
+            # {"role": "user", "content": "/no_think\n\n" + content}
         ]
         
         # num_ctxを現実的な数値（例: 8192）に抑える
