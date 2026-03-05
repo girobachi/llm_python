@@ -1,16 +1,19 @@
 from ollama import Client  # 直接 ollama ではなく Client を使う
-from prompts import SYSTEM_PROMPT # SYSTEM_PROMPT
+from prompts_sumo_auto import SYSTEM_PROMPT # SYSTEM_PROMPT
 import httpx
+import time
+
+start = time.time()
 
 # 1. 外部サーバーのアドレスを指定してクライアントを初期化
-client = Client(host='http://192.168.0.110:11434', timeout=httpx.Timeout(None))
+client = Client(host='http://172.20.240.1:11434', timeout=httpx.Timeout(None))
 
 # 2. 会話履歴を保存するリスト
 chat_history = [
     {"role": "system", "content": SYSTEM_PROMPT}
 ]
 
-filename = "tmp.txt"
+filename = "temp.txt"
 
 with open(filename, "r", encoding="utf-8") as f:
     content = f.read()
@@ -36,7 +39,10 @@ try:
 
     # 7. 回答の抽出と表示
     answer = response['message']['content']
-    print(f"AI: {answer}")
+    print(answer)
+    elapsed = time.time() - start
+    print(f"実行時間: {elapsed:.2f}秒")
 
 except Exception as e:
     print(f"エラーが発生しました。サーバーが起動しているか確認してください: {e}")
+

@@ -32,7 +32,7 @@ while True:
     try:
         # 6. 指定したサーバー(client)に履歴を投げる
         response = client.chat(
-            model='gemma3:12b',
+            model='gemma3:27b',
             messages=chat_history,
             options={
                 "temperature": 0.0,

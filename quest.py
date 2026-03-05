@@ -39,7 +39,7 @@ if __name__ == "__main__":
     client.send("cre test")
     client.send("use test")
 
-llm = OllamaLLM(model="gemma3:12b", base_url="http://172.20.240.1:11434")  # ローカルOllamaに接続
+llm = OllamaLLM(model="gemma3:27b", base_url="http://172.20.240.1:11434")  # ローカルOllamaに接続
 
 # ReActプロンプトをhubから取得
 prompt = hub.pull("hwchase17/react")
