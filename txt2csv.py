@@ -6,7 +6,16 @@ import time
 start = time.time()
 
 # 1. 外部サーバーのアドレスを指定してクライアントを初期化
-client = Client(host='http://172.20.240.1:11434', timeout=httpx.Timeout(None))
+# client = Client(host='http://172.20.240.1:11434', timeout=httpx.Timeout(None))
+
+# Mac book
+# client = Client(host='http://192.168.0.112:11434', timeout=httpx.Timeout(None))
+
+# Mac mini
+# client = Client(host='http://192.168.0.118:11434', timeout=httpx.Timeout(None))
+
+# TTDC
+client = Client(host='http://100.67.72.27:11434', timeout=httpx.Timeout(None))
 
 # 2. 会話履歴を保存するリスト
 chat_history = [

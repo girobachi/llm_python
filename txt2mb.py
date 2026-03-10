@@ -17,6 +17,12 @@ import time
 # C:\Users\girob> $env:OLLAMA_HOST="0.0.0.0"
 # C:\Users\girob> ollama serve &
 
+# TTDC
+# export OLLAMA_HOST="0.0.0.0:11434"
+# ollama serve &
+# nvidia-smi -l 1
+# unset OLLAMA_HOST
+
 # HOST_OLLAMA="http://localhost:11434" # Wsl IP
 HOST_OLLAMA="http://172.20.240.1:11434" # Wsl IP
 # tailscale0のIP 100.67.72.27 # TTDC LLM
