@@ -1,5 +1,5 @@
 from ollama import Client  # 直接 ollama ではなく Client を使う
-from prompts_sumo_auto_gemini import SYSTEM_PROMPT # SYSTEM_PROMPT
+from prompts_sumo_auto_gemini3 import SYSTEM_PROMPT # SYSTEM_PROMPT
 import httpx
 import time
 

@@ -5,7 +5,7 @@ from pathlib import Path
 from ollama import Client
 from mb_client import MBClient, Status
 # from prompts import SYSTEM_PROMPT # SYSTEM_PROMPT
-from prompts_sumo_auto_gemini import SYSTEM_PROMPT # SYSTEM_PROMPT
+from prompts_sumo_auto_gemini3 import SYSTEM_PROMPT # SYSTEM_PROMPT
 import csv
 import sys
 import pandas as pd
@@ -217,6 +217,8 @@ if __name__ == "__main__":
     client = MBClient()
     if client.connect(HOST_MB, 65001) == False:
         print("Failed to connect.")
+        elapsed = time.time() - start
+        print(f"実行時間: {elapsed:.2f}秒")
         exit(-1)
     client.send("pal 001")
     client.send("cre test")
