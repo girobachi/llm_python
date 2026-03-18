@@ -4,7 +4,8 @@ import base64
 from pathlib import Path
 from ollama import Client
 from mb_client import MBClient, Status
-from prompts import SYSTEM_PROMPT # SYSTEM_PROMPT
+# from prompts import SYSTEM_PROMPT # SYSTEM_PROMPT
+from prompts_sumo_auto_gemini import SYSTEM_PROMPT # SYSTEM_PROMPT
 import csv
 import sys
 import pandas as pd
@@ -23,10 +24,14 @@ import time
 # nvidia-smi -l 1
 # unset OLLAMA_HOST
 
+# TTDC
+HOST_OLLAMA='http://100.67.72.27:11434'
+
 # HOST_OLLAMA="http://localhost:11434" # Wsl IP
-HOST_OLLAMA="http://172.20.240.1:11434" # Wsl IP
+# HOST_OLLAMA="http://172.20.240.1:11434" # Wsl IP
 # tailscale0のIP 100.67.72.27 # TTDC LLM
-HOST_MB=""  # Wsl
+# HOST_MB=""  # Wsl
+HOST_MB="100.67.72.27" # TTDC LLM
 
 # Macbook
 # HOST_OLLAMA="http://192.168.0.112:11434" # Mac
@@ -139,6 +144,7 @@ class GemmaFileReader:
             model=self.model,
             messages=chat_history,
             options={
+                "seed": 42, # 任意の整数でOK
                 "temperature": 0.0,
                 "num_ctx": 8192 
             }
@@ -208,14 +214,14 @@ if __name__ == "__main__":
     utf82shiftjis()
 
     """ MBに変換 """
-    # client = MBClient()
-    # if client.connect(HOST_MB, 65001) == False:
-    #     print("Failed to connect.")
-    #     exit(-1)
-    # client.send("pal 001")
-    # client.send("cre test")
-    # client.send("use test")
-    # client.file_send("tmps.csv")
+    client = MBClient()
+    if client.connect(HOST_MB, 65001) == False:
+        print("Failed to connect.")
+        exit(-1)
+    client.send("pal 001")
+    client.send("cre test")
+    client.send("use test")
+    client.file_send("tmps.csv")
 
     elapsed = time.time() - start
     print(f"実行時間: {elapsed:.2f}秒")

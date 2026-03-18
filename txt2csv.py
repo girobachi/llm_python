@@ -1,5 +1,5 @@
 from ollama import Client  # 直接 ollama ではなく Client を使う
-from prompts_sumo_auto import SYSTEM_PROMPT # SYSTEM_PROMPT
+from prompts_sumo_auto_gemini import SYSTEM_PROMPT # SYSTEM_PROMPT
 import httpx
 import time
 
@@ -22,7 +22,8 @@ chat_history = [
     {"role": "system", "content": SYSTEM_PROMPT}
 ]
 
-filename = "temp.txt"
+# filename = "temp.txt"
+filename="mail.txt"
 
 with open(filename, "r", encoding="utf-8") as f:
     content = f.read()
