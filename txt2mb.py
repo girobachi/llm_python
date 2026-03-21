@@ -220,7 +220,7 @@ if __name__ == "__main__":
         elapsed = time.time() - start
         print(f"実行時間: {elapsed:.2f}秒")
         exit(-1)
-    client.send("pal 001")
+    client.send("pal test")
     client.send("cre test")
     client.send("use test")
     client.file_send("tmps.csv")

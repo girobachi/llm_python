@@ -2,7 +2,7 @@ from langchain_ollama import OllamaLLM
 from langchain_core.tools import Tool
 from langchain.agents import create_react_agent, AgentExecutor
 from langchain import hub
-from mb_client import MBClient
+from mb_client import MBClient, MBinit
 import os
 os.environ["LANGCHAIN_TRACING_V2"] = "false"
 
@@ -31,13 +31,15 @@ tools = [
 # 使用例
 
 if __name__ == "__main__":
-    client = MBClient()
-    if client.connect(HOST_MB, 65001) == False:
-        print("Failed to connect.")
-        exit(-1)
-    client.send("pal 001")
-    client.send("cre test")
-    client.send("use test")
+    # client = MBClient()
+    # if client.connect(HOST_MB, 65001) == False:
+    #     print("Failed to connect.")
+    #     exit(-1)
+    # client.send("pal 001")
+    # client.send("cre test")
+    # client.send("use test")
+
+    client = MBinit()
 
 llm = OllamaLLM(model="gemma3:27b", base_url="http://172.20.240.1:11434")  # ローカルOllamaに接続
 

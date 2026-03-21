@@ -3,6 +3,7 @@ import socket
 import time
 from enum import IntEnum
 from dataclasses import dataclass
+
 # from .errors import error_dictionary
 
 class Status(IntEnum):
@@ -20,7 +21,7 @@ class Config:
     ENCODING = "cp932"
     
     PORT = int(os.getenv("SYNAPSE_DEFAULT_PORT", "65001"))
-    HOST = os.getenv("SYNAPSE_DEFAULT_URL", "localhost")
+    HOST = os.getenv("SYNAPSE_DEFAULT_URL", "100.67.72.27" )
     MAX_RETRY = 5
     RETRY_DELAY = 1.0
 
@@ -90,6 +91,7 @@ class MBClient:
     def send(self, cmd: str) -> Status:
         """コマンド送信"""
         self._response = ""
+        print(cmd)
         if not cmd or not self.sock:
             return Status.OK if not cmd else Status.ERROR
         
@@ -209,14 +211,25 @@ class MBClient:
             h = Header(self.header.encode()[:Config.HEADER_SIZE])
             if h.error:
                 raise Exception(f"MB ERROR: {h.error_msg}")
+            
+def MBinit(host: str, mbfile: str) -> MBClient:
+    client = MBClient()
+    if client.connect(host, 65001) == False:
+        print("Failed to connect.")
+        exit(-1)
+    client.send("pal test")
+    client.send(f"cre {mbfile}")
+    client.send(f"use {mbfile}")
+    return client
 
 def main():
     """テスト"""
     try:
-        client = MBClient()
-        if client.connect() == False:
-            print("Failed to connect.")
-            return
+        # client = MBClient()
+        # if client.connect() == False:
+        #     print("Failed to connect.")
+        #     return
+        client = MBinit("100.67.72.27", "test")
         while True:
             cmd = input("Command: ")
             if not cmd or client.send(cmd) != Status.OK:
