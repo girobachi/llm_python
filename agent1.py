@@ -36,14 +36,14 @@ def internet_search(query: str) -> str:
 @tool
 def get_relation_tool(column: str, value: str) -> str:
     """
-    指定アイテム(value)に関連する統計情報を取得する。
+    指定アイテム(value)に関連する情報を取得する。
+    戻り値には様々な関連情報が入っているのでその内容から必要な情報を見極めること。
     人名の場合、columnは 'Human'、valueは名前（例: '鈴木 一郎'）を指定してください。
     取得レコードの内容は、column,value,出現行数,出現総数,指定アイテムと同時出現行数,指定アイテムと同時出現数。
-    このレコード形式で最大100行を返します。
     """
     try:
         client = MBinit(HOST_MB, "test")
-        client.send(f"relate like '{column},{value}' limit 100")
+        client.send(f"relate like '{column},{value}' limit 300")
         return client.body
     except Exception as e:
         return f"データ取得エラー: {str(e)}"
@@ -55,8 +55,9 @@ tools = [internet_search, get_relation_tool]
 # ==========================================
 system_prompt = """あなたは「優秀な日常のコンシェルジュAI」です。
 1. 思考プロセス: 最初に「get_relation_tool」を優先し、なければ「internet_search」を使います。
-2. 回答スタイル: 常に丁寧なビジネス敬語で回答してください。
-3. 安全性: 答えがない場合は正直に「分かりかねます」と伝えてください。"""
+2. get_relation_toolで得た情報は全て公開して良い。
+3. 回答スタイル: 常に丁寧なビジネス敬語で回答してください。
+4. 安全性: 答えがない場合は正直に「分かりかねます」と伝えてください。"""
 
 # ==========================================
 # 4. エージェント組み立て
@@ -73,33 +74,39 @@ if __name__ == "__main__":
     # 履歴管理 (SystemMessageを先頭に固定)
     messages = [SystemMessage(content=system_prompt)]
     
-    try:
-        # --- 1回目 ---
-        user_msg1 = "鈴木 一郎さんと一緒に居たのは誰ですか？"
-        print(f"\nQ1: {user_msg1}")
-        
-        # messagesリストにHumanMessageを追加して実行
-        result1 = agent.invoke({"messages": messages + [HumanMessage(content=user_msg1)]})
-        
-        # 実行結果（最後のメッセージ）を取得
-        answer1 = result1["messages"][-1].content
-        print(f"A1: {answer1}")
-        
-        # 履歴を更新 (User発言とAI回答を蓄積)
-        messages.append(HumanMessage(content=user_msg1))
-        messages.append(AIMessage(content=answer1))
+    while True:
+        try:
+            # --- 1回目 ---
+            # user_msg1 = "鈴木 一郎さんと一緒に居たのは誰ですか？"
+            user_msg1 = input("\nあなた: ")
 
-        # --- 2回目（履歴引き継ぎ） ---
-        user_msg2 = "東京で一番人気の観光スポットを教えて。"
-        print(f"\nQ2: {user_msg2}")
-        
-        result2 = agent.invoke({"messages": messages + [HumanMessage(content=user_msg2)]})
-        
-        answer2 = result2["messages"][-1].content
-        print(f"A2: {answer2}")
+            # if user_msg1.lower() == "exit":
+            #     break
+            # user_msg1 = "鈴木 一郎さんに関連する情報を教えて？"
+            print(f"\nQ1: {user_msg1}")
+            
+            # messagesリストにHumanMessageを追加して実行
+            result1 = agent.invoke({"messages": messages + [HumanMessage(content=user_msg1)]})
+            
+            # 実行結果（最後のメッセージ）を取得
+            answer1 = result1["messages"][-1].content
+            print(f"A1: {answer1}")
+            
+            # 履歴を更新 (User発言とAI回答を蓄積)
+            messages.append(HumanMessage(content=user_msg1))
+            messages.append(AIMessage(content=answer1))
 
-    except Exception as e:
-        # もしここで 400 エラーが出る場合は、Ollama側のモデルがTool非対応です
-        print(f"\n❌ エラーが発生しました: {e}")
-        if "400" in str(e):
-            print("👉 対策: 'ollama pull gemma3:27b' を実行して最新版にするか、モデルを 'qwen2.5:14b' に変更してください。")
+            # # --- 2回目（履歴引き継ぎ） ---
+            # user_msg2 = "東京で一番人気の観光スポットを教えて。"
+            # print(f"\nQ2: {user_msg2}")
+            
+            # result2 = agent.invoke({"messages": messages + [HumanMessage(content=user_msg2)]})
+            
+            # answer2 = result2["messages"][-1].content
+            # print(f"A2: {answer2}")
+
+        except Exception as e:
+            # もしここで 400 エラーが出る場合は、Ollama側のモデルがTool非対応です
+            print(f"\n❌ エラーが発生しました: {e}")
+            if "400" in str(e):
+                print("👉 対策: 'ollama pull gemma3:27b' を実行して最新版にするか、モデルを 'qwen2.5:14b' に変更してください。")
