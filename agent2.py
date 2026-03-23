@@ -1,10 +1,11 @@
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 import uuid 
 from langchain_ollama import ChatOllama
 from langgraph.prebuilt import create_react_agent
 from langchain_community.tools import DuckDuckGoSearchRun
 from langchain_core.tools import tool
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
-from langgraph.prebuilt import create_react_agent  # 実はまだ使える（Deprecation警告のみ）
 # mb_client は環境に合わせてインポートしてください
 from mb_client import MBClient, Status, MBinit
 
@@ -66,8 +67,7 @@ system_prompt = """あなたは「優秀な日常のコンシェルジュAI」�
 # ==========================================
 # 4. エージェント組み立て
 # ==========================================
-# 引数エラーを避けるため、modifier系は一切使わずシンプルに定義
-agent = create_react_agent(model=llm, tools=tools)
+agent = create_react_agent(model=llm, tools=tools) 
 
 # ==========================================
 # 5. 実行（会話履歴管理）

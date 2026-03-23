@@ -1,5 +1,5 @@
 from ollama import Client  # 直接 ollama ではなく Client を使う
-from prompts_sumo_auto_gemini3 import SYSTEM_PROMPT # SYSTEM_PROMPT
+from prompts_sumo_auto import SYSTEM_PROMPT # SYSTEM_PROMPT
 import httpx
 import time
 
@@ -22,8 +22,7 @@ chat_history = [
     {"role": "system", "content": SYSTEM_PROMPT}
 ]
 
-# filename = "temp.txt"
-filename="mail.txt"
+filename = "temp.txt"
 
 with open(filename, "r", encoding="utf-8") as f:
     content = f.read()
@@ -38,7 +37,8 @@ try:
     # 6. 指定したサーバー(client)に履歴を投げる
     response = client.chat(
 #        model='gpt-oss:20b',
-        model='gemma3:27b',
+        # model='gemma3:27b',
+        model='qwen2.5:14b',
         messages=chat_history,
         options={
             "temperature": 0.0,
@@ -56,3 +56,9 @@ try:
 except Exception as e:
     print(f"エラーが発生しました。サーバーが起動しているか確認してください: {e}")
 
+
+# curl http://100.67.72.27:11434/api/generate -d '{
+#   "model": "qwen2.5:14b",
+#   "prompt": "富士山の高さは？",
+#   "stream": false
+# }'

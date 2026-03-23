@@ -39,7 +39,8 @@ HOST_MB="100.67.72.27" # TTDC LLM
 
 # MODEL_LLM="gpt-oss:20b"        # LLMモデル名 gpt-oss:20b
 MODEL_LLM="gemma3:27b"       # LLMモデル名 
-# MODEL_LLM="qwen3:14b"        # LLMモデル名 日本語に強いとされるQwen3を使用。Gemma3は英語に強い。
+# MODEL_LLM="qwen2.5:14b"        # LLMモデル名 日本語に強いとされるQwen3を使用。Gemma3は英語に強い。
+# MODEL_LLM="qwen3:30b-a3b"
 
 INPUT_FOLDER="./input_folder" # 変換したいファイルを入れるフォルダ
 
