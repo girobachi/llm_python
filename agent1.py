@@ -39,14 +39,15 @@ def get_relation_tool(value: str) -> str:
     # def get_relation_tool(column: str, value: str) -> str:・
     """
     指定アイテム(value)に関連する情報を取得する。
+    人名の場合、columnは 'Human'、valueは名前（例: '鈴木 一郎'）を指定してください。
     戻り値には様々な関連情報が入っているのでその内容から必要な情報を見極めること。
     取得レコードの内容は、column,value,出現行数,出現総数,指定アイテムと同時出現行数,指定アイテムと同時出現数。
     """
         # 人名の場合、columnは 'Human'、valueは名前（例: '鈴木 一郎'）を指定してください。
     try:
         client = MBinit(HOST_MB, "test")
-        # client.send(f"relate like '{column},{value}' limit 300")
-        client.send(f"pile like '{value}' limit 300")
+        client.send(f"relate like '{column},{value}' limit 300")
+        # client.send(f"pile like '{value}' limit 300")
         return client.body
     except Exception as e:
         return f"データ取得エラー: {str(e)}"
