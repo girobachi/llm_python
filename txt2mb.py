@@ -150,7 +150,7 @@ class GemmaFileReader:
             options={
                 "seed": 42, # 任意の整数でOK
                 "temperature": 0.0,
-                "num_ctx": 8192 
+                "num_ctx": 65536,
             }
         )
         return response['message']['content']
