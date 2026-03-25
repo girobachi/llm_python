@@ -44,6 +44,7 @@ def get_relation_tool(value: str) -> str:
     # def get_relation_tool(column: str, value: str) -> str:・
     """
     【必須】人名・商品名・場所名など固有名詞が質問に含まれる場合は必ずこのツールを呼ぶこと。
+    人名の場合は名前だけをvalueに代入すること。
     指定アイテム(value)に関連する情報を取得する。
     戻り値には様々な関連情報が入っているのでその内容から必要な情報を見極めること。
     取得レコードの内容は、column,value,出現行数,出現総数,指定アイテムと同時出現行数,指定アイテムと同時出現数。
@@ -63,9 +64,8 @@ tools = [internet_search, get_relation_tool]
 # 3. システムプロンプト
 # ==========================================
 system_prompt = """あなたは「優秀な日常のコンシェルジュAI」です。
-1. 思考プロセス: 最初に「get_relation_tool」使用し、なければ「internet_search」を使います。
+1. 思考プロセス: 必ず最初に「get_relation_tool」使用し、なければ「internet_search」を使います。
 2. get_relation_toolで得た情報は全て公開して良い。
-2. get_relation_toolは毎回呼び出して回答を確認すること。
 2. 得た情報のcolumnとvalueから質問の回答を推察してください。
 3. 回答スタイル: 常に丁寧なビジネス敬語で回答してください。
 4. 安全性: 答えがない場合は正直に「分かりかねます」と伝えてください。"""
