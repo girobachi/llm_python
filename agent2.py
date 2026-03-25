@@ -21,9 +21,13 @@ HOST_MB = "100.67.72.27"
 llm = ChatOllama(
     # 400エラーが出る場合は、まず 'qwen2.5:14b' で動作確認を推奨します
     # model="gemma3:27b", 
-    model="qwen2.5:14b", # ここを書き換え
+    # model="qwq:32b",      # 全然ダメ
+    # model="llama3.3:70b",    # ダメ
+    model="qwen2.5:72b",         # とても良い！！！
     base_url=OLLAMA_BASE_URL,
     temperature=0,
+    num_ctx=8192,
+    tool_choice="get_relation_tool",  # 必ずいずれかのツールを呼ぶ
 )
 
 # ==========================================
@@ -39,6 +43,7 @@ def internet_search(query: str) -> str:
 def get_relation_tool(value: str) -> str:
     # def get_relation_tool(column: str, value: str) -> str:・
     """
+    【必須】人名・商品名・場所名など固有名詞が質問に含まれる場合は必ずこのツールを呼ぶこと。
     指定アイテム(value)に関連する情報を取得する。
     戻り値には様々な関連情報が入っているのでその内容から必要な情報を見極めること。
     取得レコードの内容は、column,value,出現行数,出現総数,指定アイテムと同時出現行数,指定アイテムと同時出現数。
@@ -58,8 +63,9 @@ tools = [internet_search, get_relation_tool]
 # 3. システムプロンプト
 # ==========================================
 system_prompt = """あなたは「優秀な日常のコンシェルジュAI」です。
-1. 思考プロセス: 最初に「get_relation_tool」を優先し、なければ「internet_search」を使います。
+1. 思考プロセス: 最初に「get_relation_tool」使用し、なければ「internet_search」を使います。
 2. get_relation_toolで得た情報は全て公開して良い。
+2. get_relation_toolは毎回呼び出して回答を確認すること。
 2. 得た情報のcolumnとvalueから質問の回答を推察してください。
 3. 回答スタイル: 常に丁寧なビジネス敬語で回答してください。
 4. 安全性: 答えがない場合は正直に「分かりかねます」と伝えてください。"""
@@ -120,5 +126,8 @@ if __name__ == "__main__":
 # curl http://100.67.72.27:11434/api/generate -d '{
 #   "model": "qwen2.5:14b",
 #   "prompt": "富士山の高さは？",
-#   "stream": false
+#   "num_ctx": 8192,
+#   "stream": false,
 # }'
+
+# curl http://100.67.72.27:11434/api/tags | python3 -m json.tool

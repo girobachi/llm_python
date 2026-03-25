@@ -37,10 +37,13 @@ HOST_MB="100.67.72.27" # TTDC LLM
 # HOST_OLLAMA="http://192.168.0.112:11434" # Mac
 # HOST_MB="192.168.0.112" # Mac
 
-# MODEL_LLM="gpt-oss:20b"        # LLMモデル名 gpt-oss:20b
-MODEL_LLM="gemma3:27b"       # LLMモデル名 
-# MODEL_LLM="qwen2.5:14b"        # LLMモデル名 日本語に強いとされるQwen3を使用。Gemma3は英語に強い。
-# MODEL_LLM="qwen3:30b-a3b"
+# MODEL_LLM="gpt-oss:20b"       # 最近使ってないので分からない
+# MODEL_LLM="gemma3:27b"        # まあまあ良いが時々TACOる
+# MODEL_LLM="qwen2.5:14b"       # ツールTACOる
+MODEL_LLM="qwen2.5:72b"         # とても良い！！！
+# MODEL_LLM="qwq:32b"           # 全然ダメ
+# MODEL_LLM="llama3.3:70b"      # 漢字読めない全然ダメ csv化は良さげ　SUMOが得意そう
+
 
 INPUT_FOLDER="./input_folder" # 変換したいファイルを入れるフォルダ
 
