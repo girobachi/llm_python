@@ -2,6 +2,12 @@ from ollama import Client  # 直接 ollama ではなく Client を使う
 from prompts_sumo_auto import SYSTEM_PROMPT # SYSTEM_PROMPT
 import httpx
 import time
+import streamlit as st
+
+st.set_page_config(page_title="Demo App", page_icon="📊", layout="wide")
+
+st.title("📊 Streamlit Demo App")
+st.markdown("Streamlit Community Cloudのデプロイサンプルです。")
 
 start = time.time()
 
@@ -38,7 +44,7 @@ try:
     response = client.chat(
 #        model='gpt-oss:20b',
         # model='gemma3:27b',
-        model='qwen2.5:14b',
+        model='qwen2.5:72b',
         messages=chat_history,
         options={
             "temperature": 0.0,
@@ -49,9 +55,11 @@ try:
 
     # 7. 回答の抽出と表示
     answer = response['message']['content']
+    st.write(answer)
     print(answer)
     elapsed = time.time() - start
-    print(f"実行時間: {elapsed:.2f}秒")
+    st.subheader(f"実行時間: {elapsed:.2f}秒")
+    # print(f"実行時間: {elapsed:.2f}秒")
 
 except Exception as e:
     print(f"エラーが発生しました。サーバーが起動しているか確認してください: {e}")

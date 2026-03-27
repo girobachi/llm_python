@@ -1,0 +1,5 @@
+streamlit
+ollama
+httpx
+time
+langchain_ollama

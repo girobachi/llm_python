@@ -1,13 +1,10 @@
 import ollama
 import fitz
-import base64
 from pathlib import Path
 from ollama import Client
 from mb_client import MBClient, Status
-# from prompts import SYSTEM_PROMPT # SYSTEM_PROMPT
 from prompts_sumo_auto_gemini3 import SYSTEM_PROMPT # SYSTEM_PROMPT
 import csv
-import sys
 import pandas as pd
 import time
 
