@@ -141,3 +141,6 @@ if user_msg1 := st.chat_input("メッセージを入力してください"):
 # }'
 
 # curl http://100.67.72.27:11434/api/tags | python3 -m json.tool
+
+# pip install streamlit
+# streamlit run agentw.py

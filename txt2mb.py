@@ -7,15 +7,16 @@ from prompts_sumo_auto_gemini3 import SYSTEM_PROMPT # SYSTEM_PROMPT
 import csv
 import pandas as pd
 import time
+import chardet
 
 # 起動方法
-# Windows
+# Windows 
 # C:\Users\girob> taskkill /F /IM "ollama app.exe"
 # C:\Users\girob> taskkill /F /IM ollama.exe
 # C:\Users\girob> $env:OLLAMA_HOST="0.0.0.0"
 # C:\Users\girob> ollama serve &
 
-# TTDC
+# TTDC 
 # export OLLAMA_HOST="0.0.0.0:11434"
 # ollama serve &
 # nvidia-smi -l 1
@@ -54,14 +55,17 @@ class GemmaFileReader:
         self.client = Client(host=host, timeout=1800)  # ← リモートホスト指定   
         
     # 対応拡張子
-    SUPPORTED_EXTENSIONS = {".txt", ".pdf", ".jpg", ".jpeg", ".png", ".webp", ".bmp"}
+    SUPPORTED_EXTENSIONS = {".txt", ".pdf", ".jpg", ".jpeg", ".png", ".webp", ".bmp", ".csv"}
 
     def ask(self, prompt: str, file_path: str = None) -> str:
         suffix = Path(file_path).suffix.lower() if file_path else ""
 
-        if suffix == ".txt":
-            content = self._load_txt(file_path)
-            messages = [{"role": "user", "content": f"{prompt}\n\n{content}"}]
+        if suffix  in (".txt"):
+            # LLMをスキップしてそのまま読み込む
+            content = self._load_csv(file_path)
+            return content  # askを使わず直接返す
+            # content = self._load_txt(file_path)
+            # messages = [{"role": "user", "content": f"{prompt}\n\n{content}"}]
 
         elif suffix == ".pdf":
             content = self._load_pdf(file_path)
@@ -70,15 +74,42 @@ class GemmaFileReader:
         elif suffix in [".jpg", ".jpeg", ".png", ".webp", ".bmp"]:
             messages = [{"role": "user", "content": prompt, "images": [file_path]}]
 
+        elif suffix == ".csv":
+            # LLMをスキップしてそのまま読み込む
+            content = self._load_csv(file_path)
+            return content  # askを使わず直接返す
+
         else:
             messages = [{"role": "user", "content": prompt}]
 
         response = self.client.chat(model=self.model, messages=messages)
         return response["message"]["content"]
 
-    def _load_txt(self, path: str) -> str:
-        with open(path, "r", encoding="utf-8") as f:
+    # def _load_txt(self, path: str) -> str:
+    #     with open(path, "r", encoding="utf-8") as f:
+    #         return f.read()
+    def _load_csv(self, path: str, max_rows: int = 100) -> str:
+        for enc in ("utf-8", "cp932", "utf-8-sig"):
+            try:
+                with open(path, "r", encoding=enc, newline="") as f:
+                    rows = list(csv.reader(f))
+                preview = rows[:max_rows]
+                text = "\n".join(",".join(row) for row in preview)
+                if len(rows) > max_rows:
+                    text += f"\n... (省略: 全{len(rows)}行中{max_rows}行表示)"
+                return text
+            except (UnicodeDecodeError, LookupError):
+                continue
+        with open(path, "r", encoding="utf-8", errors="replace", newline="") as f:
             return f.read()
+    
+    def _load_txt(self, path: str) -> str:
+        # エンコーディング自動判定
+        with open(path, "rb") as f:
+            raw = f.read()
+        detected = chardet.detect(raw)
+        encoding = detected.get("encoding") or "utf-8"
+        return raw.decode(encoding, errors="replace")
 
     def _load_pdf(self, path: str) -> str:
         doc = fitz.open(path)
@@ -200,16 +231,16 @@ if __name__ == "__main__":
     """ input_folder/下のファイルを全てoutput_fileファイルに変換してまとめる """
     reader.transcribe_folder2csv() 
 
-    """ csv check """
-    print(f"チェック対象: {TEMP_UTF8_CSV}\n")
-    errors = check_pair_structure(TEMP_UTF8_CSV)
-    if not errors:
-        print("✅ 問題なし")
-    else:
-        print(f"❌ {len(errors)}件の問題:")
-        for e in errors:
-            loc = f"行{e['row']}" + (f"/列{e['col']}" if "col" in e else "")
-            print(f"  [{loc}] {e['issue']}")
+    # """ csv check """
+    # print(f"チェック対象: {TEMP_UTF8_CSV}\n")
+    # errors = check_pair_structure(TEMP_UTF8_CSV)
+    # if not errors:
+    #     print("✅ 問題なし")
+    # else:
+    #     print(f"❌ {len(errors)}件の問題:")
+    #     for e in errors:
+    #         loc = f"行{e['row']}" + (f"/列{e['col']}" if "col" in e else "")
+    #         print(f"  [{loc}] {e['issue']}")
 
     """ utf8のファイルをshiftjisに変換 """
     utf82shiftjis()
