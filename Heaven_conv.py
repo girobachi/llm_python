@@ -25,13 +25,6 @@ SYSTEM_PROMPT = """
 - 変換後は、行ごとに改行のみを行え。
 """
 
-# SYSTEM_PROMPT = """
-# 入力したデータは、カラムがcommu_id,name,pref,btype_l,btype_s,holiday,shop_type,fst_area,snd_area,access,infoの順番で並んでいます。
-# commu_id,name,pref,btype_l,btype_s,holiday,shop_type,fst_area,snd_area,access,info
-# 毎に対応する値を全て抽出してください。余計なタグははずすこと。絵文字やshiftjisに無い文字は文末なら句点(。)に、文中なら削除する。
-# 全ての行を正確に変換すること。変換後は、行ごとに改行してください。
-# """
-
 BATCH_SIZE = 1 # 1回のLLM呼び出しに送る行数（調整可能）
 
 def split_csv_into_batches(content: str, batch_size: int) -> list[tuple[str, list[str]]]:
@@ -83,7 +76,7 @@ def convert_batch(client: Client, header: list[str], rows: list[list[str]], batc
     response = client.chat(
         # model="gpt-oss:20b",
         # model="gemma3:27b",
-        # model="qwen2.5:27b",
+        # model="qwen2.5:14b",
         model="qwen2.5:72b",
 
         messages=messages,
