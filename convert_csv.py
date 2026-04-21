@@ -101,3 +101,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     convert_csv(sys.argv[1], sys.argv[2])
+
+# girls_data.20260325_100227.csvからタグ削除、shiftjis化 → girls_data.20260325_100227_sjis.csv
+# python .\convert_csv.py  girls_data.20260325_100227.csv  \
+# SPD_ girls_data.20260325_100227_sjis.csv

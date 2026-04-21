@@ -375,7 +375,21 @@ if __name__ == "__main__":
 #   --insert-before-first "#!mbspd" \
 #   --insert-before-first "000,挿入行,X,Y"
 
-# python .\split_csv.py .\diary_data.20260325_101413_sjis.csv \
-#  -s 300M -e cp932 -p SPD_diary -d 3  \
-#  --insert-before-first '#!mbspd' \
-#  --insert-before-first 'time,mem_id,$subject,$body'
+# latest diary
+# python .\split_csv.py .\diary_data.20260325_101413_sjis.csv  \
+# -s 3200M -e cp932 -p SPD_diary3G -d 3  --insert-before-first  \
+# '#!mbspd'  --insert-before-first 'Date,Time,mem_id,$subject,$body'  \
+# --convert-unixtime
+
+# latest girl
+# python .\split_csv.py .\girls_data.20260325_100227_sjis.csv  \
+# -s 300M -e cp932 -p SPD_girl -d 3  --insert-before-first  \
+# '#!mbspd'  --insert-before-first  \
+# 'pref,commu_id,shopname,mem_id,girlname,age,height,bust,cup,waist, \
+# hip,bodytype,indivity,personal,playstyle,catch'
+
+# latest shop
+# python .\split_csv.py .\diary_data.20260325_101413_sjis.csv  \ 
+# -s 1000M -e cp932 -p SPD_diary1G -d 3  --insert-before-first  \
+# '#!mbspd'  --insert-before-first 'Date,Time,mem_id,  \
+# $subject,$body' --convert-unixtime
