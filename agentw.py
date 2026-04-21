@@ -34,7 +34,7 @@ llm = ChatOllama(
 # ==========================================
 @tool
 def internet_search(query: str) -> str:
-    """最新のニュース、天気、一般常識など、外部情報を調べる時に使用してください。"""
+    """最新のニュース、天気、一般常識など、外部情報を調べる時に使用してください。""" 
     search = DuckDuckGoSearchRun()
     return search.run(query)
 
