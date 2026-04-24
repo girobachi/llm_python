@@ -212,14 +212,14 @@ class MBClient:
             if h.error:
                 raise Exception(f"MB ERROR: {h.error_msg}")
             
-def MBinit(host: str, mbfile: str) -> MBClient:
+def MBinit(host: str, pal: str, mbfile: str) -> MBClient:
     client = MBClient()
     if client.connect(host, 65001) == False:
         print("Failed to connect.")
         exit(-1)
-    client.send("pal test")
+    client.send(f"pal {pal}")
     client.send(f"cre {mbfile}")
-    client.send(f"use {mbfile}")
+    # client.send(f"use {mbfile}")
     return client
 
 def main():
