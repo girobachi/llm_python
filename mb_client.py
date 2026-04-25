@@ -31,11 +31,11 @@ class Header:
     __slots__ = ('version', 'size', 'error', 'command', 'time')
     
     def __init__(self, data: bytes):
-        self.version = data[0:8].decode()
-        self.size = int(data[8:16].decode().lstrip("0") or "0", 16)
-        self.error = int(data[16:20].decode().lstrip("0") or "0", 16)
-        self.command = int(data[20:24].decode(), 16)
-        self.time = float(data[24:32].decode())
+        self.version = data[0:8].decode(Config.ENCODING, "ignore")
+        self.size = int(data[8:16].decode(Config.ENCODING, "ignore").lstrip("0") or "0", 16)
+        self.error = int(data[16:20].decode(Config.ENCODING, "ignore").lstrip("0") or "0", 16)
+        self.command = int(data[20:24].decode(Config.ENCODING, "ignore"), 16)
+        self.time = float(data[24:32].decode(Config.ENCODING, "ignore"))
     
     @property
     def error_msg(self) -> str:
@@ -58,7 +58,6 @@ class Header:
 
 class MBClient:
     """MBクライアント"""
-
     def __init__(self):
         pass
     
@@ -94,6 +93,18 @@ class MBClient:
         print(cmd)
         if not cmd or not self.sock:
             return Status.OK if not cmd else Status.ERROR
+
+        # # 残データをフラッシュ
+        # try:
+        #     self.sock.setblocking(False)
+        #     while True:
+        #         chunk = self.sock.recv(4096)
+        #         if not chunk:
+        #             break
+        # except (BlockingIOError, OSError):
+        #     pass  # 残データなし
+        # finally:
+        #     self.sock.setblocking(True)    
         
         try:
             # 送信
@@ -117,7 +128,16 @@ class MBClient:
                 if not chunk:
                     break
                 body += chunk
+
+
+            # print(f"header.size={header.size} body len={len(body)}")  # 確認用
             
+            if len(body) != header.size:
+                print(f"body mismatch!")  # 確認用
+                return Status.ERROR
+            
+
+
             if len(body) != header.size:
                 return Status.ERROR
             
@@ -218,7 +238,7 @@ def MBinit(host: str, pal: str, mbfile: str) -> MBClient:
         print("Failed to connect.")
         exit(-1)
     client.send(f"pal {pal}")
-    client.send(f"cre {mbfile}")
+    # client.send(f"cre {mbfile}")
     # client.send(f"use {mbfile}")
     return client
 
