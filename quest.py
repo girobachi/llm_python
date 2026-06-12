@@ -1,7 +1,26 @@
+from langchain_ollama import ChatOllama
+from langchain_core.messages import HumanMessage, AIMessage
+
+llm = ChatOllama(model="gemma4:31b", base_url="http://100.106.118.73:11434")
+
+history = []
+
+while True:
+    user_input = input("\nあなた: ")
+    if user_input.lower() == "exit":
+        break
+
+    history.append(HumanMessage(content=user_input))
+    response = llm.invoke(history)
+    history.append(response)
+
+    print(f"\nAI: {response.content}")
+
+
+'''
 from langchain_ollama import OllamaLLM
 from langchain_core.tools import Tool
-from langchain.agents import create_react_agent, AgentExecutor
-from langchain import hub
+from langgraph.prebuilt import create_react_agent
 from mb_client import MBClient, MBinit
 import os
 os.environ["LANGCHAIN_TRACING_V2"] = "false"
@@ -41,7 +60,9 @@ if __name__ == "__main__":
 
     client = MBinit()
 
-llm = OllamaLLM(model="gemma3:27b", base_url="http://172.20.240.1:11434")  # ローカルOllamaに接続
+
+llm = OllamaLLM(model="gemma4:31b", base_url="http://100.106.118.73:11434")  # ローカルOllamaに接続
+# llm = OllamaLLM(model="gemma3:27b", base_url="http://172.20.240.1:11434")  # ローカルOllamaに接続
 
 # ReActプロンプトをhubから取得
 prompt = hub.pull("hwchase17/react")
@@ -60,3 +81,5 @@ while True:
 
     # elapsed = time.time() - start
     # print(f"実行時間: {elapsed:.2f}秒")
+
+'''

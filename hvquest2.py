@@ -109,11 +109,11 @@ st.set_page_config(layout="wide")
 st.title("Heaven")
 
 # sort 2 を初回だけ実行
-if "initialized" not in st.session_state:
-    client = MBinit(HOST_MB, "heaven", "diary")
-    client.send("sort 2")
-    client.close()
-    st.session_state.initialized = True
+# if "initialized" not in st.session_state:
+#     client = MBinit(HOST_MB, "heaven", "diary")
+#     client.send("sort 2")
+#     client.close()
+#     st.session_state.initialized = True
 
 # セッション初期化
 if "prefectures" not in st.session_state:
@@ -181,9 +181,19 @@ st.divider()
 # --- 日記検索ボタン ---
 if st.button("日記を検索", type="secondary", key="btn_diary_search",
              disabled=(girlname == "選択してください")):
-    with st.spinner("検索中..."):
-        result, server_time = search_diary(girlname, shop)
-    st.session_state.diary_history.append((f"{shop} / {girlname}", result, server_time))
+    last_key = (st.session_state.get("last_diary_girlname"), st.session_state.get("last_diary_shop"))
+    if last_key != (girlname, shop):
+        with st.spinner("検索中..."):
+            result, server_time = search_diary(girlname, shop)
+        st.session_state.diary_history.append((f"{shop} / {girlname}", result, server_time))
+        st.session_state.last_diary_girlname = girlname
+        st.session_state.last_diary_shop = shop
+        
+# if st.button("日記を検索", type="secondary", key="btn_diary_search",
+#              disabled=(girlname == "選択してください")):
+#     with st.spinner("検索中..."):
+#         result, server_time = search_diary(girlname, shop)
+#     st.session_state.diary_history.append((f"{shop} / {girlname}", result, server_time))
 
 # --- 日記履歴表示（新しい順） ---
 if st.session_state.diary_history:
