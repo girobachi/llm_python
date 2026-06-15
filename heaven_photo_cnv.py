@@ -6,8 +6,19 @@ import re
 import csv
 import time
 
+#pip install langchain-ollama
 llm = ChatOllama(
     model="gemma4:31b",
+    # model="gemma4:e4b",
+    # model="nemotron3:33b",
+    # model="qwen3-vl:32b",
+    # model="granite4.1:30b", error
+    # model="llama3.2:3b", error
+    # model="mistral-medium-3.5:128b",
+    # model="qwen2.5vl:72b", error
+    # model="huihui_ai/gemma-4-abliterated:48b",
+    # model="huihui_ai/gpt-oss-abliterated:120b",
+    # model="hf.co/huihui-ai/Huihui-DeepSeek-V4-Flash-abliterated-ds4-GGUF:IQ2_XXS",
     base_url="http://100.106.118.73:11434",
     temperature=0.0,
     top_p=0.9,        # 確率上位90%のトークンのみ使用
