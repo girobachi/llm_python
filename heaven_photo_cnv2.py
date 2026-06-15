@@ -149,4 +149,4 @@ print("テスト結果サマリー")
 print(f"{'='*60}")
 for model_name, count in summary:
     status = f"{count}件成功" if count > 0 else "スキップ/失敗"
-    print(f"  {status:12s} {model_name}")dd
+    print(f"  {status:12s} {model_name}")
