@@ -8,10 +8,10 @@ import time
 
 #pip install langchain-ollama
 llm = ChatOllama(
-    model="gemma4:31b",
+    # model="gemma4:31b",
     # model="gemma4:e4b",
     # model="nemotron3:33b",
-    # model="qwen3-vl:32b",
+    model="qwen3-vl:32b",
     # model="granite4.1:30b", error
     # model="llama3.2:3b", error
     # model="mistral-medium-3.5:128b",
